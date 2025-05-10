@@ -1,0 +1,156 @@
+{{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
+{%- style -%}
+    #Banner-{{ section.id }}::after {
+        opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};
+    }
+    @media screen and (max-width: 749px) {
+      #Banner-{{ section.id }}::before,
+      #Banner-{{ section.id }} .banner__media::before {
+        padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
+        content: '';
+        display: block;
+      }
+    }
+
+    @media screen and (min-width: 750px) {
+      #Banner-{{ section.id }}::before,
+      #Banner-{{ section.id }} .banner__media::before {
+        padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
+        content: '';
+        display: block;
+      }
+    }
+    .heading{
+        z-index: 99
+    }
+    .bannerH__content {
+        padding: 0;
+        display: flex;
+        position: relative;
+        width: 47%;
+        align-items: flex-end;
+        justify-content: flex-start;
+        z-index: 2;
+    }
+    .bannerH__heading{
+        font-size: 35px;
+        text-align: left;
+        margin: 0;
+    }
+    .bannerH__text{
+        text-align: left;
+    }
+    .bannerH__box{
+        padding: 30px;
+    }
+{%- endstyle -%}
+
+{%- liquid
+    assign full_width = '100vw'
+    assign widths = '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840'
+-%}
+<div
+  id="Banner-{{ section.id }}"
+  class="banner"
+>
+    <div class="banner__media media">
+        {%- liquid
+            assign image_height = section.settings.image.width | divided_by: section.settings.image.aspect_ratio
+            assign sizes = full_width
+        -%}
+        {{
+        section.settings.image
+        | image_url: width: 3840
+        | image_tag:
+          width: section.settings.image.width,
+          height: image_height,
+          sizes: sizes,
+          widths: widths
+      }}
+    </div>
+    <div class="bannerH__content">
+        <div class="bannerH__box content-container">
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+                {%- when 'heading' -%}
+                    <h2
+                    class="bannerH__heading inline-richtext">
+                    {{ block.settings.heading }}
+                    </h2>
+                {%- when 'sub-heading' -%}
+                    <div class="bannerH__text">
+                        <p>{{ block.settings.subHeading }}</p>
+                    </div>                
+            {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    </div>
+</div>
+
+{% schema %}
+    {
+        "name": "t:sections.image-banner-new.name",
+        "tag": "section",
+        "class": "section",
+        "settings": [
+            {
+                "type": "image_picker",
+                "id": "image",
+                "label": "t:sections.image-banner-new.settings.image.label"
+            }
+        ],
+        "blocks": [
+            {
+                "type": "heading",
+                "name": "t:sections.image-banner-new.blocks.heading.name",
+                "limit": 1,
+                "settings": [
+                    {
+                        "type": "inline_richtext",
+                        "id": "heading",
+                        "default": "t:sections.image-banner-new.blocks.heading.settings.heading.default",
+                        "label": "t:sections.image-banner-new.blocks.heading.settings.heading.label"
+                    }
+                ]
+            },
+            {
+                "type": "sub-heading",
+                "name": "t:sections.image-banner-new.blocks.sub-heading.name",
+                "limit": 1,
+                "settings": [
+                    {
+                        "type": "inline_richtext",
+                        "id": "subHeading",
+                        "default": "t:sections.image-banner-new.blocks.heading.settings.sub-heading.default",
+                        "label": "t:sections.image-banner-new.blocks.heading.settings.sub-heading.label"
+                    }
+                ]
+            },
+            {
+                "type": "banner-button",
+                "name": "t:sections.image-banner-new.blocks.banner-button.name",
+                "limit": 1,
+                "settings": [
+                    {
+                        "type": "inline_richtext",
+                        "id": "banner-button-title",
+                        "default": "t:sections.image-banner-new.blocks.banner-button.settings.banner-button.default",
+                        "label": "t:sections.image-banner-new.blocks.banner-button.settings.banner-button.label"
+                    }
+                ]
+            }
+        ],
+        "presets": [
+            {
+            "name": "t:sections.image-banner-new.presets.name",
+            "blocks": [
+                {
+                    "type": "heading"
+                },
+                {
+                    "type": "sub-heading"
+                }
+            ]}
+        ]
+    }
+{% endschema %}

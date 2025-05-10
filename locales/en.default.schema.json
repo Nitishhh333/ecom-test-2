@@ -1317,6 +1317,73 @@
         "name": "Image banner"
       }
     },
+    "image-banner-new": {
+      "name": "Image banner New",
+      "settings": {
+        "image": {
+          "label": "Image 1"
+        }
+      },
+      "blocks": {
+        "heading": {
+          "name": "Heading",
+          "settings": {
+            "heading": {
+              "label": "Heading",
+              "default": "Image banner"
+            },
+            "sub-heading": {
+              "label": "Sub-heading",
+              "default": "Image banner"
+            }
+          }
+        },
+        "sub-heading": {
+          "name": "Sub-heading",
+          "settings": {
+            "sub-heading": {
+              "label": "Sub-heading",
+              "default": "Image banner"
+            }
+          }
+        },
+        "banner-button": {
+          "name": "banner-button",
+          "settings": {
+            "banner-button": {
+              "label": "Title",
+              "default": "Image banner"
+            }
+          }
+        },
+        "text": {
+          "name": "Text",
+          "settings": {
+            "text": {
+              "label": "Text",
+              "default": "Give customers details about the banner image(s) or content on the template."
+            },
+            "text_style": {
+              "options__1": {
+                "label": "Body"
+              },
+              "options__2": {
+                "label": "Subtitle"
+              },
+              "options__3": {
+                "label": "Uppercase"
+              },
+              "label": "Style"
+            }
+          }
+        },
+        
+      },
+      "presets": {
+        "name": "Image banner New"
+      }
+    },
+
     "image-with-text": {
       "name": "Image with text",
       "settings": {
