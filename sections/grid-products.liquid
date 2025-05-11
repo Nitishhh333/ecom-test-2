@@ -5,26 +5,34 @@
         document.querySelectorAll(".main-options input,.main-options select").forEach((e) => {
             e.addEventListener("change",(evt) => {
                 const selectedValues = [];
-                var checked_color = document.querySelectorAll(".main-options input:checked")[0]?.value;
-                var checked_size = document.querySelectorAll(".main-options select")[0]?.value;
-                var checked_value = checked_size+' / '+checked_color;
-                var match_title = Number(evt.target.closest(".pro-information").querySelector(".all_variants_main input[data-title='"+ checked_value +"']").value);
-                document.querySelector(".custom-quick-add").dataset.id = match_title;
-                const priceElement = document.querySelector(".pro-information .price");
-                if (priceElement) {
-                const matchedVariant = Array.from(
-                    evt.target.closest(".pro-information").querySelectorAll(".all_variants_main input")
-                ).find(input => Number(input.value) === variantId);
-
-                if (matchedVariant) {
-                    const variant = $product.variants.find(v => v.id === variantId);
-                    if (variant) {
-                    priceElement.textContent = variant.price;
+                var checked_color = document.querySelectorAll(".main-options input:checked")[0]?.value || null;
+                var checked_size = document.querySelectorAll(".main-options select")[0]?.value || null;
+                if(checked_color && checked_size){
+                    var checked_value = checked_size+' / '+checked_color;
+                    var match_title = Number(evt.target.closest(".pro-information").querySelector(".all_variants_main input[data-title='"+ checked_value +"']").value);
+                    var Selected_Variant = Number(
+                        evt.target.closest(".pro-information")
+                            .querySelector(".all_variants_main input[data-title='" + checked_value + "']")
+                            .value
+                        );
+                    document.querySelector(".custom-quick-add").dataset.id = Selected_Variant;
+                    const priceElement = document.querySelector(".pro-information .price");
+                    if (priceElement) {
+                        const matchedVariant = Array.from(
+                            evt.target.closest(".pro-information").querySelectorAll(".all_variants_main input")
+                        ).find(input => Number(input.value) === Selected_Variant);
+    
+                        if (matchedVariant) {
+                            const variant = product.variants.find(v => v.id === Selected_Variant);
+                            if (variant) {
+                            priceElement.textContent = variant.price;
+                            }
+                        }
                     }
-                }
-                }
+    
+                    Add_to_cart();
 
-                Add_to_cart();
+                }
             })
         })
       };
