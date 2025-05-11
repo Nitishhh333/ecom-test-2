@@ -1361,6 +1361,7 @@
           "settings": {
             "banner-button": {
               "label": "Title",
+              "link": "Link",
               "default": "Image banner"
             }
           }
