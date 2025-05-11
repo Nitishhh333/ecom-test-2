@@ -11,10 +11,42 @@
   "sections": {
     "main": {
       "type": "main-page",
+      "disabled": true,
       "settings": {
         "padding_top": 28,
         "padding_bottom": 28
       }
+    },
+    "topbar_mQ4MKc": {
+      "type": "topbar",
+      "blocks": {
+        "heading_1_zgCQPP": {
+          "type": "heading_1",
+          "settings": {
+            "heading_1": "<strong>TISSO VISION</strong>"
+          }
+        },
+        "heading_2_KJGtTL": {
+          "type": "heading_2",
+          "settings": {
+            "heading_2": "Find the ideal gift for your loved ones."
+          }
+        },
+        "heading_button_nCECMe": {
+          "type": "heading_button",
+          "settings": {
+            "topbar_button_title": "CHOOSE GIFT",
+            "topbar_button_link": "shopify://pages/new-homepage"
+          }
+        }
+      },
+      "block_order": [
+        "heading_1_zgCQPP",
+        "heading_2_KJGtTL",
+        "heading_button_nCECMe"
+      ],
+      "name": "t:sections.topbar.name",
+      "settings": {}
     },
     "image_banner_new_HFK4AL": {
       "type": "image-banner-new",
@@ -30,20 +62,46 @@
           "settings": {
             "subHeading": "Discover Joy: Your Ultimate Gift Holiday Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season."
           }
+        },
+        "banner_button_QX7hgq": {
+          "type": "banner-button",
+          "settings": {
+            "banner_button_title": "Shop Now",
+            "banner_button_link": "shopify://pages/new-homepage"
+          }
         }
       },
       "block_order": [
         "heading_ChNK87",
-        "sub_heading_QUigxn"
+        "sub_heading_QUigxn",
+        "banner_button_QX7hgq"
       ],
       "name": "t:sections.image-banner-new.presets.name",
       "settings": {
         "image": "shopify://shop_images/BannerModified.png"
       }
+    },
+    "topbar_Jt3C6N": {
+      "type": "topbar",
+      "blocks": {
+        "heading_1_nN9NqX": {
+          "type": "heading_1",
+          "settings": {
+            "heading_1": "SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL"
+          }
+        }
+      },
+      "block_order": [
+        "heading_1_nN9NqX"
+      ],
+      "name": "t:sections.topbar.name",
+      "settings": {}
     }
   },
   "order": [
     "main",
-    "image_banner_new_HFK4AL"
+    "topbar_mQ4MKc",
+    "image_banner_new_HFK4AL",
+    "topbar_Jt3C6N"
   ]
 }
