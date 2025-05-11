@@ -3414,6 +3414,17 @@
         }
       }
     },
+    "grid-products":{
+      "name": "Grid Products",
+      "settings": {
+        "product": {
+          "label": "Product"
+        },
+        "heading": {
+          "label": "Title"
+        }
+      }
+    },
     "image-banner-new": {
       "name": "Image banner New",
       "settings": {
