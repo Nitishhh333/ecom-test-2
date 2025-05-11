@@ -25,24 +25,68 @@
     }
     .bannerH__content {
         padding: 0;
-        display: flex;
+        display: flex
+    ;
         position: relative;
-        width: 47%;
+        width: 43%;
         align-items: flex-end;
         justify-content: flex-start;
         z-index: 2;
+        padding-left: 5%;
     }
     .bannerH__heading{
-        font-size: 35px;
+        font-size: clamp(25px, 3.5vw, 500px);
         text-align: left;
         margin: 0;
     }
     .bannerH__text{
         text-align: left;
+        font-size: clamp(14px, 1.4vw, 500px);
     }
-    .bannerH__box{
+    .bannerH__box {
         padding: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
     }
+    .ml-20{
+        margin-left: 20px;
+        font-size: 50;
+    }
+    .button-animated {
+        display: inline-block;
+        font-size: clamp(14px, 1.4vw, 80px); /* Responsive font size */
+        padding: clamp(8px, 1.2vw, 50px) clamp(16px, 3vw, 88px); /* Responsive padding */
+        color: #fff;
+        background: linear-gradient(to left, #000 50%, #fff545 50%);
+        background-size: 200% 100%;
+        background-position: right bottom;
+        border: none;
+        transition: background-position 0.4s ease, color 0.4s ease;
+        white-space: nowrap;
+        max-width: 100%;
+        box-sizing: border-box;
+        }
+
+        .button-animated:hover {
+            background-position: left bottom;
+            color: #000;
+        }
+
+        .button-animated::after {
+            content: unset;
+        }
+        .icon-wrapper {
+            margin-left: clamp(8px, 4vw, 32px); /* Responsive left margin */
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .icon-arrow {
+            width: clamp(16px, 1.4vw, 240px);      /* Responsive width */
+            /* height: clamp(16px, 2vw, 240px);     Responsive height */
+            fill: currentColor;
+        }
 {%- endstyle -%}
 
 {%- liquid
@@ -84,6 +128,24 @@
                 {%- when 'sub-heading' -%}
                     <div class="bannerH__text">
                         <p>{{ block.settings.subHeading }}</p>
+                    </div> 
+                {%- when 'banner-button' -%}
+                    <div class="bannerH__text">
+                        <a
+                            {% if block.settings.banner_button_link == blank %}
+                                role="link" aria-disabled="true"
+                            {% else %}
+                                href="{{ block.settings.banner_button_link }}"
+                            {% endif %}
+                            class="button button-animated"
+                            >
+                            {{- block.settings.banner_button_title | escape -}}
+                            <span class="icon-wrapper">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon-arrow" viewBox="0 0 14 10">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M8.537.808a.5.5 0 0 1 .817-.162l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 1 1-.708-.708L11.793 5.5H1a.5.5 0 0 1 0-1h10.793L8.646 1.354a.5.5 0 0 1-.109-.546" />
+                                </svg>
+                            </span>
+                        </a>
                     </div>                
             {%- endcase -%}
         {%- endfor -%}
@@ -137,9 +199,13 @@
                 "settings": [
                     {
                         "type": "inline_richtext",
-                        "id": "banner-button-title",
-                        "default": "t:sections.image-banner-new.blocks.banner-button.settings.banner-button.default",
+                        "id": "banner_button_title",
                         "label": "t:sections.image-banner-new.blocks.banner-button.settings.banner-button.label"
+                    },
+                    {
+                        "type": "url",
+                        "id": "banner_button_link",
+                        "label": "t:sections.image-banner-new.blocks.banner-button.settings.banner-button.link"
                     }
                 ]
             }
