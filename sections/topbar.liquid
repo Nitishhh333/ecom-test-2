@@ -1,0 +1,140 @@
+{%- style -%}
+    .topbar-col{
+        font-size: clamp(12px, 1.4vw, 80px);
+    }
+    .topbarH__box {
+        display: flex;
+        justify-content: space-between;
+        padding: clamp(8px, 1.2vw, 50px) clamp(8px, 3vw, 88px);
+        background: #f5f5f5;
+        align-items: center;
+    }
+    .flex-columns:has(> *:only-child) {
+        justify-content: center;
+    }
+    .button-animated-1 {
+        display: inline-block;
+        font-size: clamp(12px, 1.4vw, 80px); /* Responsive font size */
+        padding: clamp(8px, 1vw, 50px) clamp(16px, 2vw, 88px); /* Responsive padding */
+        color: #000;
+        background: linear-gradient(to left, #fff545 50%, #000 50%);
+        background-size: 200% 100%;
+        background-position: right bottom;
+        border: none;
+        transition: background-position 0.4s ease, color 0.4s ease;
+        white-space: nowrap;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .button-animated-1:hover {
+        background-position: left bottom;
+        color: #fff;
+    }
+
+    .button-animated-1::after {
+        content: unset;
+    }
+    
+{%- endstyle -%}
+<div id="TopBar-{{ section.id }}" class="topbar">
+  <div class="topbarH__content">
+    <div class="topbarH__box content-container flex-columns">
+        {%- for block in section.blocks -%}
+            {%- case block.type -%}
+                {%- when 'heading_1' -%}
+                    <div class="topbar-col">
+                        {{ block.settings.heading_1 }}
+                    </div>
+                {%- when 'heading_2' -%}
+                    <div class="topbar-col">
+                        {{ block.settings.heading_2 }}
+                    </div>
+                {%- when 'heading_button' -%}
+                    <div class="topbar-col">
+                        <a href="#" class="button button-animated-1">
+                            {{ block.settings.topbar_button_title }}
+                            <span class="icon-wrapper">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon-arrow" viewBox="0 0 14 10">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M8.537.808a.5.5 0 0 1 .817-.162l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 1 1-.708-.708L11.793 5.5H1a.5.5 0 0 1 0-1h10.793L8.646 1.354a.5.5 0 0 1-.109-.546" />
+                                </svg>
+                            </span>
+                        </a>
+                    </div>
+                    
+            {%- endcase-%}
+        {%- endfor -%}
+      
+      <!-- Column 3 (Button or link) -->
+      
+
+    </div>
+  </div>
+</div>
+
+
+{% schema %}
+    {
+        "name": "t:sections.topbar.name",
+        "tag": "section",
+        "class": "section",
+        "blocks": [
+            {
+                "type": "heading_1",
+                "name": "t:sections.topbar.blocks.heading_1.label",
+                "limit": 1,
+                "settings": [
+                    {
+                        "type": "inline_richtext",
+                        "id": "heading_1",
+                        "label": "t:sections.topbar.blocks.heading_1.label"
+                    }
+                ]
+            },
+            {
+                "type": "heading_2",
+                "name": "t:sections.topbar.blocks.heading_2.label",
+                "limit": 1,
+                "settings": [
+                    {
+                        "type": "inline_richtext",
+                        "id": "heading_2",
+                        "label": "t:sections.topbar.blocks.heading_2.label"
+                    }
+                ]
+            },
+            {
+                "type": "heading_button",
+                "name": "t:sections.topbar.blocks.heading_button.label",
+                "limit": 1,
+                "settings": [
+                    {
+                        "type": "inline_richtext",
+                        "id": "topbar_button_title",
+                        "label": "t:sections.topbar.blocks.heading_button.label"
+                    },
+                    {
+                        "type": "url",
+                        "id": "topbar_button_link",
+                        "label": "t:sections.topbar.blocks.heading_button.label"
+                    }
+                ]
+            }
+        ],
+        "presets": [
+            {
+            "name": "t:sections.topbar.name",
+            "blocks": [
+                {
+                    "type": "heading_1"
+                },
+                {
+                    "type": "heading_2"
+                },
+                {
+                    "type": "heading_button"
+                }
+            ]}
+        ]
+    }
+{% endschema %}
