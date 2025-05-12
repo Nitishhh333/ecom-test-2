@@ -1,289 +1,431 @@
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 <script>
-      document.addEventListener('DOMContentLoaded', function () {
-      const changeOptions = (product) => {
-        document.querySelectorAll(".main-options input,.main-options select").forEach((e) => {
-            e.addEventListener("change",(evt) => {
-                const selectedValues = [];
-                var checked_color = document.querySelectorAll(".main-options input:checked")[0]?.value || null;
-                var checked_size = document.querySelectorAll(".main-options select")[0]?.value || null;
-                if(checked_color && checked_size){
-                    var checked_value = checked_size+' / '+checked_color;
-                    var match_title = Number(evt.target.closest(".pro-information").querySelector(".all_variants_main input[data-title='"+ checked_value +"']").value);
-                    var Selected_Variant = Number(
-                        evt.target.closest(".pro-information")
-                            .querySelector(".all_variants_main input[data-title='" + checked_value + "']")
-                            .value
-                        );
-                    document.querySelector(".custom-quick-add").dataset.id = Selected_Variant;
-                    const priceElement = document.querySelector(".pro-information .price");
-                    if (priceElement) {
-                        const matchedVariant = Array.from(
-                            evt.target.closest(".pro-information").querySelectorAll(".all_variants_main input")
-                        ).find(input => Number(input.value) === Selected_Variant);
-    
-                        if (matchedVariant) {
-                            const variant = product.variants.find(v => v.id === Selected_Variant);
-                            if (variant) {
-                            priceElement.textContent = variant.price;
-                            }
-                        }
-                    }
-    
-                    Add_to_cart();
+  const addToCart = (id) => {
+    let formData = {
+      'items': [{
+      'id': id,
+      'quantity': 1
+      },
+      {
+      'id': 45491510116514,
+      'quantity': 1
+      }]
+    };
+    const button = document.querySelector('.custom-quick-add');
+    button.classList.add('loading-active');
+    button.disabled = true;
+    fetch(window.Shopify.routes.root + 'cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => {
+      return response.json();
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    })
+    .finally(()=> {
+      button.classList.remove('loading-active')
+      button.textContent = 'Successfully Added to cart...'
+      button.style.background="green"
+      setTimeout(() => {
+        button.textContent = 'Add to cart'
+        button.style.background="black"
+        button.disabled = false;
+      }, 2000);
 
-                }
-            })
-        })
-      };
-      const Add_to_cart_function = (id) => {
-        let formData = {
-           'items': [{
-            'id': id,
-            'quantity': 1
-            }]
-          };
-          fetch(window.Shopify.routes.root + 'cart/add.js', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
+    })
+  }
+  const changeOptions = (product) => {
+    const optionIS = document.querySelectorAll(".main-options input,.main-options select");
+    optionIS.forEach((e) => {
+      e.addEventListener("change",(evt) => {
+        const checkedColor = document.querySelectorAll(".main-options input:checked")[0]?.value || null;
+        const checkedSize = document.querySelectorAll(".main-options select")[0]?.value || null;
+        if(checkedColor && checkedSize){
+          const checkedValue = checkedSize + ' / ' + checkedColor;
+          const proInfo = document.querySelector(".pro-information .all_variants_main input[data-title='" + checkedValue + "']");
+          document.querySelector(".custom-quick-add").dataset.id = proInfo.value;
+          const priceElement = document.querySelector(".pro-information .price");
+          if (priceElement) {
+            const variant = product.variants.find(v => parseInt(v.id) === parseInt(proInfo.value));
+            priceElement.textContent = variant.price;
+          }
+          document.querySelector(".custom-quick-add").addEventListener("click", (e) => {
+            const variantIid = Number(e.target.dataset.id);
+            addToCart(variantIid);
           })
-          .then(response => {
-            return response.json();
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      };
-      const Add_to_cart = () => {
-        document.querySelector(".custom-quick-add").addEventListener("click", (e) => {
-          var var_id = Number(e.target.dataset.id);
-          Add_to_cart_function(var_id);
-        })
+        }
+      })
+    })
+  }
+  const createHiddenVariantsHtml = (product) => {
+    let variantWrapper = document.createElement("div");
+    let variantDiv = document.createElement("div");
+    variantDiv.setAttribute("class", "all_variants_main")
+    product.variants.forEach((e) => {
+      let variantInput = document.createElement("input");
+      variantInput.type = "hidden";
+      variantInput.value = e.id;
+      variantInput.name = "variant";
+      variantInput.dataset.title = e.title;
+      variantDiv.appendChild(variantInput);
+    }) 
+    variantWrapper.appendChild(variantDiv);
+    return variantWrapper;
+  }
+  const createOptionsHtml = (product) => {
+    let variantOptions = document.createElement("div");
+    variantOptions.setAttribute("class",`main-options`);
+    product.options.forEach((option) => {
+      let wrapper = document.createElement("div");
+      let label = document.createElement("h6");
+      wrapper.classList.add(`option-${option.name}`);
+      label.textContent = option.name;
+      wrapper.appendChild(label);
+      if (option.name.toLowerCase() === "color") {
+        let colorContainer = document.createElement("div");
+        colorContainer.className = "color-swatches";
+        option.values.forEach((value, index) => {
+          let input = document.createElement("input");
+          input.type = "radio";
+          input.name = option.name;
+          input.value = value;
+          input.id = `${option.name}-${index}`;
+          
+          let colorBox = document.createElement("label");
+          colorBox.className = `color-box`;
+          colorBox.style.borderLeftColor = value.toLowerCase();
+          colorBox.textContent = value;
+          colorBox.setAttribute("for", input.id);
+          colorContainer.appendChild(input);
+          colorContainer.appendChild(colorBox);
+        });
+        wrapper.appendChild(colorContainer);
+      }else if(option.name.toLowerCase() === "size"){
+        let select = document.createElement("select");
+        select.name = option.name;
+        option.values.forEach((value) => {
+        let opt = document.createElement("option");
+        opt.value = value;
+        opt.textContent = value;
+        select.appendChild(opt);
+        });
+        wrapper.appendChild(select);
+      }else{
+        let container = document.createElement("div");
+        option.values.forEach((value, index) => {
+          let input = document.createElement("input");
+          input.type = "radio";
+          input.name = option.name;
+          input.value = value;
+          input.id = `${option.name}-${index}`;
+
+          let label = document.createElement("label");
+          label.setAttribute("for", input.id);
+          label.textContent = value;
+
+          container.appendChild(input);
+          container.appendChild(label);
+        });
+        wrapper.appendChild(container);
       }
-        
-      document.querySelectorAll(".custom-quickview").forEach((e) => {
-          e.addEventListener("click",function(evt){
-              var $gt_handle = evt.target.dataset.handle;
-              fetch(`/products/${$gt_handle}.json`).then((response)=>{
-                  return response.json()
-              }).then((data) => {
-                
-                var $product = data.product;
-                console.log("$product--->",$product)
-                
-                // variant options js starts from here
-                var variant_options = document.createElement("div");
-                variant_options.setAttribute("class",`main-options`);
-                $product.options.forEach((option) => {
-                    let wrapper = document.createElement("div");
-                    wrapper.classList.add(`option-${option.name}`);
-                    let label = document.createElement("h6");
-                    label.textContent = option.name;
-                    wrapper.appendChild(label);
+      variantOptions.appendChild(wrapper);
+    })
+    return variantOptions;
+  }
+  
+  const openPopup = (quickView) => {
+    quickView.forEach((button) => {
+      button.addEventListener("click", function (evt) {
+        const productHandle = evt.target.dataset.handle;
+        fetch(`/products/${productHandle}.json`).then((response)=>{
+          return response.json()
+        }).then(({product}) => {
+          const quickViewPopup = document.querySelector(".quickview_popup")
+          const quickViewInnerPopup = document.querySelector(".quickview_popup .quickview_pro_inner")
+          
+          // create variant html with input
+          const variantHtml = createHiddenVariantsHtml(product);
+          // end
+          
+          // create variant options
+          const optionWrapper = document.createElement("div");
+          const optionHtml = createOptionsHtml(product);
+          optionWrapper.appendChild(optionHtml);
+          // end
 
-                    // Color as radio swatch
-                    if (option.name.toLowerCase() === "color") {
-                        let colorContainer = document.createElement("div");
-                        colorContainer.className = "color-swatches";
-                        option.values.forEach((value, index) => {
-                        let input = document.createElement("input");
-                        input.type = "radio";
-                        input.name = option.name;
-                        input.value = value;
-                        input.id = `${option.name}-${index}`;
-                        
-                        let colorBox = document.createElement("label");
-                        colorBox.className = "color-box";
-                        colorBox.style.backgroundColor = value.toLowerCase(); // assumes value is a color
-                        colorBox.setAttribute("for", input.id);
-                        
-                        colorContainer.appendChild(input);
-                        colorContainer.appendChild(colorBox);
-                        });
-                        wrapper.appendChild(colorContainer);
-                    }
-                    // Size as dropdown
-                    else if (option.name.toLowerCase() === "size") {
-                        let select = document.createElement("select");
-                        select.name = option.name;
-                        option.values.forEach((value) => {
-                        let opt = document.createElement("option");
-                        opt.value = value;
-                        opt.textContent = value;
-                        select.appendChild(opt);
-                        });
-                        wrapper.appendChild(select);
-                    }
-                    // Default to radio
-                    else {
-                        let container = document.createElement("div");
-                        option.values.forEach((value, index) => {
-                        let input = document.createElement("input");
-                        input.type = "radio";
-                        input.name = option.name;
-                        input.value = value;
-                        input.id = `${option.name}-${index}`;
+          // append all html
+          let html = `
+          <button class="quickview-close" aria-label="Close quickview">×</button>
 
-                        let label = document.createElement("label");
-                        label.setAttribute("for", input.id);
-                        label.textContent = value;
-
-                        container.appendChild(input);
-                        container.appendChild(label);
-                        });
-                        wrapper.appendChild(container);
-                    }
-
-                    variant_options.appendChild(wrapper);
-                    });
-
-                // end here
-
-                // variants loop starts from here
-                var variants_main = document.createElement("div");
-                variants_main.setAttribute("class","all_variants_main")
-                $product.variants.forEach((e) => {
-                  let var_input = document.createElement("input");
-                  var_input.type = "hidden";
-                  var_input.value = e.id;
-                  var_input.name = "variant";
-                  var_input.dataset.title = e.title;
-                  variants_main.appendChild(var_input);
-                })
-                let variant_wrapper = document.createElement("div");
-                variant_wrapper.appendChild(variants_main);
-                let final_Variants = variant_wrapper.innerHTML;
-                // end
-
-                
-                // append all html
-                var options_wrapper = document.createElement("div");
-                options_wrapper.appendChild(variant_options);
-                var string_options_main = options_wrapper.innerHTML;
-                var $html = `
-                  <div class="product-main">
-                    <div class="product-media">
-                      <img src="${$product.image.src}" alt="${$product.handle}">
-                    </div>
-                    <div class="pro-information">
-                      ${final_Variants}
-                      <h5>${$product.title}</h5>
-                      <p class="price">${$product.variants[0].price}</p>
-                      <p>${$product.body_html}</p>
-                      ${string_options_main}
-                      <button type="button" data-id="" class="custom-quick-add">Add to cart</button>
-                    </div>
-                  </div>
-                  `;
-                document.querySelector(".quickview_popup .quickview_pro_inner").innerHTML = $html;
-                document.querySelector(".quickview_popup").classList.add("active");
-                changeOptions($product);
-              })
-          })
+            <div class="product-main">
+              <div class="product-media">
+                <img src="${product.image.src}" alt="${product.handle}">
+              </div>
+              <div class="pro-information">
+                ${variantHtml.innerHTML}
+                <h5>${product.title}</h5>
+                <p class="price">${product.variants[0].price}</p>
+                <p>${product.body_html}</p>
+              </div>
+            </div>
+            ${optionWrapper.innerHTML}
+            <button type="button" data-id="" class="custom-quick-add">Add to cart <span class="loading">
+              {{ 'loading-spinner.svg' | inline_asset_content }}
+            </span></button>
+            
+          `;
+          quickViewInnerPopup.innerHTML = html;
+          quickViewPopup.classList.add("active");
+          // end
+          changeOptions(product);
         })
       })
-    </script>
+    })
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    const quickView = document.querySelectorAll(".custom-quickview");
+    openPopup(quickView)
+    document.addEventListener("click", function (e) {
+      if (e.target.classList.contains("quickview-close")) {
+        
+        document.querySelector(".quickview_pro_inner").innerHTML = ''; // Or your actual popup show class
+        document.querySelector(".quickview_popup").classList.remove("active"); // Or your actual popup show class
+      }
+    });
+  });
+</script>
 {% style %}
-    .quickview_popup.active {
-      position: fixed;
-      z-index: 9999;
-      width: 90%;
-      max-width: 800px;
-      background: #fff;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      overflow-y: auto;
-      max-height: 90vh;
-      padding: 24px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-      border-radius: 12px;
+.custom-quickview {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.custom-quickview:hover  {
+  background: #333;
+  color: #fff
+}
+
+.media {
+  position: relative; /* Ensure positioning context for absolute button */
+}
+
+.quickview_pro_inner {
+  position: relative;
+}
+  .quickview-close{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #fff;
+    border: 1px solid #ccc;
+    font-size: 20px;
+    line-height: 1;
+    padding: 4px 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.3s ease;
+  }
+  .quickview_popup.active {
+    position: fixed;
+    z-index: 9999;
+    width: 90%;
+    max-width: 800px;
+    background: #fff;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    overflow-y: auto;
+    max-height: 90vh;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    font-family: 'Helvetica Neue', sans-serif;
+  }
+  
+  .product-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  @media (min-width: 768px) {
+    .product-main {
+      flex-direction: row;
     }
-    
-    .quickview_popup .product__description {
-      display: none;
-    }
-    
-    .quickview_pro_inner .product-main {
-      display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: 24px;
-      align-items: start;
-    }
-    
-    .quickview_pro_inner .product-main img {
-      width: 100%;
-      border-radius: 8px;
-      object-fit: cover;
-    }
-    
-    .pro-information h5 {
-      font-size: 1.25rem;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    
-    .pro-information .price {
-      font-size: 1.1rem;
-      color: #333;
-      font-weight: 600;
-      margin-bottom: 15px;
-    }
-    
-    .main-options {
-      margin-bottom: 20px;
-    }
-    
-    .main-options > div {
-      margin-bottom: 10px;
-    }
-    
-    .main-options h6 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-    
-    .main-options label {
-      margin-right: 10px;
-      cursor: pointer;
-      display: inline-block;
-      padding: 6px 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      transition: all 0.2s ease-in-out;
-      font-size: 0.9rem;
-    }
-    
-    .main-options input[type="radio"] {
-      display: none;
-    }
-    
-    .main-options input[type="radio"]:checked + label,
-    .main-options label:has(input[type="radio"]:checked) {
-      background-color: #f37a25;
-      color: #fff;
-      border-color: #f37a25;
-    }
-    
-    .custom-quick-add {
-      background-color: #f37a25;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      font-size: 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    
-    .custom-quick-add:hover {
-      background-color: #e26515;
-    }
-    {% endstyle %}
+  }
+  
+  .product-media {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .product-media img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  .pro-information {
+    flex: 1;
+  }
+  
+  .pro-information h5 {
+    font-size: 20px;
+    margin: 10px 0 5px;
+  }
+  
+  .pro-information .price {
+    font-weight: bold;
+    font-size: 18px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+  }
+  
+  .pro-information p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 16px;
+  }
+  
+  .main-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .main-options > div {
+    width: 100%;
+  }
+  
+  .main-options h6 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 10px 0 5px;
+  }
+  
+  .color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.color-swatches input[type="radio"] {
+  display: none;
+}
+
+.color-box {
+  width: 110px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-left-width: 8px; /* Thicker left border for color */
+  /* border-radius: 6px; */
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+  padding: 10px
+}
+
+input[type="radio"]:checked + .color-box {
+  border-color: #000;
+  background: #000;
+  color: #fff;
+}
+
+.color-box::after {
+  content: attr(data-color-label);
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  margin-top: 4px;
+  color: #333;
+  white-space: nowrap;
+}
+
+  
+  .main-options select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  
+  .custom-quick-add {
+  background-color: #111;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+}
+
+.custom-quick-add .loading {
+  display: none;
+  width: 20px;
+  height: 20px;
+}
+
+.custom-quick-add .spinner {
+  width: 100%;
+  height: 100%;
+  animation: spin 1s linear infinite;
+}
+
+.custom-quick-add .path {
+  stroke: #fff;
+  stroke-linecap: round;
+}
+
+.custom-quick-add.loading-active .btn-text {
+  display: none;
+}
+
+.custom-quick-add.loading-active .loading {
+  display: inline-block;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+  
+  .custom-quick-add:hover {
+    background-color: #333;
+  }
+  {% endstyle %}
     
 
 <div class="page-width-desktop">
@@ -327,16 +469,15 @@
                                         >
                                     </div>
                                 </div>
+                                {% assign product_form_id = 'quick-add-' | append: section_id | append: card_product.id %}
+                                      <button class="custom-quickview" data-handle="{{ card_product.handle }}">
+                                      +
+                                      </button>
+                                        {% comment %} <button class="custom-quickview" data-handle="black-leather-bag" aria-label="Quick view">
+          <span class="plus-icon">+</span>
+        </button> {% endcomment %}
                             </div>
-                            <div class="card__content">
-                                <div class="quick-add no-js-hidden">
-                                    {% assign product_form_id = 'quick-add-' | append: section_id | append: card_product.id %}
-                                    <button class="custom-quickview" data-handle="{{ card_product.handle }}" style="position: relative;z-index: 3;">
-                                        Quick view
-                                    </button>
-                                    
-                                </div>
-                            </div>
+                            
                         </div>
                     </div>
                 </li>
@@ -345,6 +486,7 @@
     </ul>
     <div class="quickview_popup">
         <div class="quickview_pro_inner">
+          
             
         </div>
     </div>
